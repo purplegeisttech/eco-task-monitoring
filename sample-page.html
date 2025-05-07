@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>CSU - ECO TASK MONITORING</title>
+    <title>CSU - ECO TASK MONITORING DASHBOARD</title>
     <!-- HTML5 Shim and Respond.js IE11 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 11]>
@@ -42,8 +42,9 @@
 					<div class="main-menu-header">
 						<img class="img-radius" src="assets/images/user/avatar-2.jpg" alt="User-Profile-Image">
 						<div class="user-details">
-							<span>John Doe</span>
-							<div id="more-details">Tag-iya sa ertr<i class="fa fa-chevron-down m-l-5"></i></div>
+							 <span class="user-name-placeholder" class="text-white font-weight-bold"></span>
+                              <span class="user-position-placeholder" class="text-white font-weight-bold"></span>
+							  <div id=user-position><i class="fa fa-chevron-down m-l-5"></i></div>
 						</div>
 					</div>
 					<div class="collapse" id="nav-user-link">
@@ -147,7 +148,7 @@
 					<a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
 					<a href="#!" class="b-brand">
 						<!-- ========   change your logo hear   ============ -->
-						<img src="assets/images/logo.png" alt="" class="logo">
+						<img src="assets/images/tech2.png" alt="" class="logo">
 						<img src="assets/images/logo-icon.png" alt="" class="logo-thumb">
 					</a>
 					<a href="#!" class="mob-toggler">
@@ -538,19 +539,19 @@
     <!-- Required Js -->
 	<script>
 		async function verifySession() {
-		  const encodedName = localStorage.getItem("user_name");
-		  const encodedPosition = localStorage.getItem("user_position");
+		  const nameEnc = localStorage.getItem("user_name");
+		  const posEnc = localStorage.getItem("user_position");
 		  const sig = localStorage.getItem("user_signature");
-		  const secret = "freetheslaves"; // must match Apps Script
+		  const secret = "freetheslaves"; // Must match your GAS secret
 	  
-		  if (!encodedName || !encodedPosition || !sig) {
-			alert("Not logged in. Redirecting...");
+		  if (!nameEnc || !posEnc || !sig) {
+			alert("Please sign in.");
 			window.location.href = "auth-signin.html";
 			return;
 		  }
 	  
-		  const message = `${encodedName}.${encodedPosition}`;
 		  const encoder = new TextEncoder();
+		  const message = `${nameEnc}.${posEnc}`;
 	  
 		  const key = await crypto.subtle.importKey(
 			"raw",
@@ -560,25 +561,33 @@
 			["verify"]
 		  );
 	  
-		  const isValid = await crypto.subtle.verify(
+		  const valid = await crypto.subtle.verify(
 			"HMAC",
 			key,
 			Uint8Array.from(atob(sig), c => c.charCodeAt(0)),
 			encoder.encode(message)
 		  );
 	  
-		  if (!isValid) {
-			alert("Session invalid or expired.");
+		  if (!valid) {
+			alert("Session invalid. Please sign in again.");
 			localStorage.clear();
 			window.location.href = "auth-signin.html";
 			return;
 		  }
 	  
-		  // Session is valid, show user info
-		  const name = atob(encodedName);
-		  const position = atob(encodedPosition);
-		  document.getElementById("user-name").innerText = name;
-		  document.getElementById("user-position").innerText = position;
+		  // Decode and display name/position
+		  const name = atob(nameEnc);
+		  const position = atob(posEnc);
+		   // Inject name and position into all matching elements
+		document.querySelectorAll(".user-name-placeholder").forEach(el => {
+			el.textContent = name;
+		  });
+	  
+		  document.querySelectorAll(".user-position-placeholder").forEach(el => {
+			el.textContent = position;
+		  });
+	
+		  
 		}
 	  
 		verifySession();
